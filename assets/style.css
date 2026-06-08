@@ -1,0 +1,168 @@
+/* =========================================================================
+   Shared styles for the whole calculator site.
+   Change a value here once and it updates everywhere.
+   Colors are defined as "variables" at the top so theming is easy later.
+   ========================================================================= */
+
+:root {
+  --bg:        #f5f6f8;   /* page background            */
+  --card:      #ffffff;   /* card / panel background    */
+  --text:      #1f2733;   /* main text                  */
+  --muted:     #69727d;   /* secondary / hint text      */
+  --border:    #e3e6ea;   /* lines and outlines         */
+  --accent:    #2563eb;   /* buttons, links, highlights */
+  --accent-d:  #1d4ed8;   /* accent when pressed/hover  */
+  --accent-bg: #eef3ff;   /* light tint of the accent   */
+  --radius:    14px;      /* roundness of corners       */
+  --shadow:    0 1px 2px rgba(16,24,40,.04), 0 4px 16px rgba(16,24,40,.06);
+  --maxw:      820px;     /* max content width          */
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---- Layout container ------------------------------------------------- */
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 24px 18px 56px;
+}
+
+/* ---- Site header ------------------------------------------------------ */
+.site-header { text-align: center; margin: 18px 0 28px; }
+.site-header h1 { font-size: 1.9rem; margin: 0 0 6px; letter-spacing: -0.5px; }
+.site-header p  { color: var(--muted); margin: 0; font-size: 1rem; }
+
+/* ---- Back link on calculator pages ------------------------------------ */
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-size: .95rem;
+  color: var(--muted);
+}
+.back:hover { color: var(--accent); text-decoration: none; }
+
+/* ---- Homepage grid of calculator cards -------------------------------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+.card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.card:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  border-color: #cdd6e4;
+  box-shadow: 0 2px 4px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.10);
+}
+.card .icon { font-size: 1.8rem; line-height: 1; }
+.card h2 { font-size: 1.1rem; margin: 12px 0 4px; color: var(--text); }
+.card p  { font-size: .9rem; color: var(--muted); margin: 0; }
+
+/* ---- A panel (used inside calculator pages) --------------------------- */
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.panel h1 { font-size: 1.5rem; margin: 0 0 4px; }
+.panel .subtitle { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
+
+/* ---- Form fields ------------------------------------------------------ */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: .9rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.field .hint { font-weight: 400; color: var(--muted); }
+.field input, .field select {
+  width: 100%;
+  font-size: 1rem;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+}
+.field input:focus, .field select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+/* ---- Buttons ---------------------------------------------------------- */
+.btn {
+  display: inline-block;
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 13px 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  transition: background .12s ease;
+}
+.btn:hover  { background: var(--accent-d); }
+.btn:active { transform: translateY(1px); }
+
+/* ---- Result box ------------------------------------------------------- */
+.result {
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 12px;
+  background: var(--accent-bg);
+  border: 1px solid #d8e3ff;
+}
+.result .big {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent-d);
+}
+.result .rows { margin-top: 12px; }
+.result .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-top: 1px dashed #cfdcff;
+  font-size: .95rem;
+}
+.result .row span:last-child { font-weight: 600; }
+
+/* ---- Footer ----------------------------------------------------------- */
+.foot {
+  text-align: center;
+  color: var(--muted);
+  font-size: .85rem;
+  margin-top: 40px;
+}

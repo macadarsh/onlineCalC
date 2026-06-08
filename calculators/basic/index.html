@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basic Calculator</title>
+  <!-- "../../" means: go up two folders to reach the shared stylesheet. -->
+  <link rel="stylesheet" href="../../assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>" />
+  <style>
+    /* Styles used only by this calculator live here. */
+    .calc { max-width: 360px; margin: 0 auto; }
+    .screen {
+      background: #0f1626;
+      color: #fff;
+      border-radius: 12px;
+      padding: 18px 20px;
+      text-align: right;
+      margin-bottom: 14px;
+      min-height: 86px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .screen .history { color: #8a93a6; font-size: .95rem; min-height: 1.2em; word-break: break-all; }
+    .screen .current { font-size: 2.1rem; font-weight: 700; word-break: break-all; }
+    .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .key {
+      font-size: 1.25rem;
+      padding: 18px 0;
+      /* Fallback colours (after the comma) keep the keypad readable even if
+         the shared stylesheet fails to load for any reason. */
+      border: 1px solid var(--border, #e3e6ea);
+      border-radius: 12px;
+      background: #fff;
+      color: #1f2733;
+      cursor: pointer;
+      user-select: none;
+      transition: background .1s ease, transform .05s ease;
+    }
+    .key:hover  { background: #f0f2f6; }
+    .key:active { transform: translateY(1px); }
+    .key.op     { background: var(--accent-bg, #eef3ff); color: var(--accent-d, #1d4ed8); font-weight: 700; }
+    .key.op:hover { background: #e2ecff; }
+    .key.equals { background: var(--accent, #2563eb); color: #fff; font-weight: 700; }
+    .key.equals:hover { background: var(--accent-d, #1d4ed8); }
+    .key.util   { background: #fbeaea; color: #b42318; font-weight: 600; }
+    .key.wide   { grid-column: span 2; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="../../index.html">← All calculators</a>
+
+    <div class="panel calc">
+      <h1>Basic Calculator</h1>
+      <p class="subtitle">Tap the buttons or use your keyboard.</p>
+
+      <div class="screen">
+        <div class="history" id="history"></div>
+        <div class="current" id="current">0</div>
+      </div>
+
+      <div class="keys" id="keys">
+        <button class="key util" data-action="clear">AC</button>
+        <button class="key util" data-action="back">⌫</button>
+        <button class="key op" data-op="%">%</button>
+        <button class="key op" data-op="/">÷</button>
+
+        <button class="key" data-num="7">7</button>
+        <button class="key" data-num="8">8</button>
+        <button class="key" data-num="9">9</button>
+        <button class="key op" data-op="*">×</button>
+
+        <button class="key" data-num="4">4</button>
+        <button class="key" data-num="5">5</button>
+        <button class="key" data-num="6">6</button>
+        <button class="key op" data-op="-">−</button>
+
+        <button class="key" data-num="1">1</button>
+        <button class="key" data-num="2">2</button>
+        <button class="key" data-num="3">3</button>
+        <button class="key op" data-op="+">+</button>
+
+        <button class="key wide" data-num="0">0</button>
+        <button class="key" data-num=".">.</button>
+        <button class="key equals" data-action="equals">=</button>
+      </div>
+    </div>
+
+    <footer class="foot">No data leaves your device. Everything runs in your browser.</footer>
+  </div>
+
+  <script>
+  (function () {
+    // --- The calculator's "memory" --------------------------------------
+    var first = null;      // the number entered before an operator
+    var op = null;         // the chosen operator (+ - * / %)
+    var current = "0";     // what's shown on screen right now
+    var justEvaluated = false; // true right after pressing "="
+
+    var currentEl = document.getElementById("current");
+    var historyEl = document.getElementById("history");
+
+    function render() {
+      currentEl.textContent = current;
+      var sym = { "+": "+", "-": "−", "*": "×", "/": "÷", "%": "%" };
+      historyEl.textContent = (first !== null && op)
+        ? (trim(first) + " " + sym[op]) : "";
+    }
+
+    // Avoid ugly long decimals like 0.30000000000000004
+    function trim(n) {
+      if (n === "" || n === null) return "";
+      var num = Number(n);
+      if (!isFinite(num)) return "Error";
+      return parseFloat(num.toFixed(10)).toString();
+    }
+
+    function inputNumber(d) {
+      if (justEvaluated) { current = "0"; justEvaluated = false; }
+      if (d === ".") {
+        if (current.indexOf(".") === -1) current += ".";
+      } else {
+        current = (current === "0") ? d : current + d;
+      }
+      render();
+    }
+
+    function chooseOp(nextOp) {
+      if (op && first !== null && !justEvaluated) {
+        compute();              // chain calculations, e.g. 2 + 3 + 4
+      } else {
+        first = current;
+      }
+      op = nextOp;
+      current = "0";
+      justEvaluated = false;
+      render();
+    }
+
+    function compute() {
+      if (op === null || first === null) return;
+      var a = Number(first), b = Number(current), r;
+      switch (op) {
+        case "+": r = a + b; break;
+        case "-": r = a - b; break;
+        case "*": r = a * b; break;
+        case "/": r = (b === 0) ? NaN : a / b; break;
+        case "%": r = a % b; break;
+      }
+      current = isFinite(r) ? trim(r) : "Error";
+      first = null;
+      op = null;
+      justEvaluated = true;
+      render();
+    }
+
+    function clearAll()  { first = null; op = null; current = "0"; justEvaluated = false; render(); }
+    function backspace() {
+      if (justEvaluated) return clearAll();
+      current = current.length > 1 ? current.slice(0, -1) : "0";
+      render();
+    }
+
+    // --- Clicking buttons ----------------------------------------------
+    document.getElementById("keys").addEventListener("click", function (e) {
+      var t = e.target;
+      if (t.dataset.num)    inputNumber(t.dataset.num);
+      else if (t.dataset.op) chooseOp(t.dataset.op);
+      else if (t.dataset.action === "equals") compute();
+      else if (t.dataset.action === "clear")  clearAll();
+      else if (t.dataset.action === "back")   backspace();
+    });
+
+    // --- Using the physical keyboard -----------------------------------
+    document.addEventListener("keydown", function (e) {
+      var k = e.key;
+      if (k >= "0" && k <= "9") inputNumber(k);
+      else if (k === ".") inputNumber(".");
+      else if (k === "+" || k === "-" || k === "*" || k === "/" || k === "%") chooseOp(k);
+      else if (k === "Enter" || k === "=") { e.preventDefault(); compute(); }
+      else if (k === "Backspace") backspace();
+      else if (k === "Escape") clearAll();
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

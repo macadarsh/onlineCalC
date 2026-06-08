@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- This line makes the site work nicely on phones. Don't remove it. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Calculators</title>
+  <meta name="description" content="A collection of free, simple online calculators. No login needed." />
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>" />
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="site-header">
+      <h1>🧮 Online Calculators</h1>
+      <p>Free and simple. No sign-up, works on any device.</p>
+    </header>
+
+    <!-- The cards below are generated automatically from the registry. -->
+    <main id="grid" class="grid"></main>
+
+    <footer class="foot">
+      Built as a simple, modular static site · works offline and online
+    </footer>
+
+  </div>
+
+  <!-- Load the list of calculators, then draw the cards. Order matters. -->
+  <script src="calculators/calculators.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

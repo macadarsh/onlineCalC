@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loan / EMI Calculator</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏦</text></svg>" />
+  <style>
+    .loan { max-width: 460px; margin: 0 auto; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 420px) { .two { grid-template-columns: 1fr; } }
+    .error { color: #b42318; font-size: .9rem; margin-top: 10px; min-height: 1.2em; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="../../index.html">← All calculators</a>
+
+    <div class="panel loan">
+      <h1>Loan / EMI Calculator</h1>
+      <p class="subtitle">EMI = your fixed monthly payment on a loan.</p>
+
+      <div class="field">
+        <label for="amount">Loan amount <span class="hint">(how much you borrow)</span></label>
+        <input id="amount" type="number" inputmode="decimal" placeholder="e.g. 500000" value="500000" min="0" />
+      </div>
+
+      <div class="two">
+        <div class="field">
+          <label for="rate">Interest rate <span class="hint">(% per year)</span></label>
+          <input id="rate" type="number" inputmode="decimal" placeholder="e.g. 9" value="9" min="0" step="0.01" />
+        </div>
+        <div class="field">
+          <label for="years">Loan term <span class="hint">(years)</span></label>
+          <input id="years" type="number" inputmode="decimal" placeholder="e.g. 5" value="5" min="0" step="0.1" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="currency">Currency symbol <span class="hint">(just for display)</span></label>
+        <input id="currency" type="text" maxlength="3" value="₹" />
+      </div>
+
+      <button class="btn" id="calc">Calculate</button>
+      <div class="error" id="error"></div>
+
+      <div class="result" id="result" style="display:none;">
+        <div>Monthly payment (EMI)</div>
+        <div class="big" id="emi">—</div>
+        <div class="rows">
+          <div class="row"><span>Total interest paid</span><span id="interest">—</span></div>
+          <div class="row"><span>Total amount paid</span><span id="total">—</span></div>
+          <div class="row"><span>Number of payments</span><span id="count">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot">Nothing is sent anywhere — the maths happens in your browser.</footer>
+  </div>
+
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+
+    function money(n, sym) {
+      // Format with thousands separators and 2 decimals, e.g. ₹10,379.00
+      var s = Number(n).toLocaleString(undefined, {
+        minimumFractionDigits: 2, maximumFractionDigits: 2
+      });
+      return sym + s;
+    }
+
+    function calculate() {
+      var P = parseFloat($("amount").value);   // principal
+      var annual = parseFloat($("rate").value); // annual interest %
+      var years = parseFloat($("years").value);
+      var sym = ($("currency").value || "").trim() || "";
+      var err = $("error");
+      err.textContent = "";
+
+      if (!(P > 0) || isNaN(annual) || annual < 0 || !(years > 0)) {
+        err.textContent = "Please enter a positive amount, a rate of 0 or more, and a term in years.";
+        $("result").style.display = "none";
+        return;
+      }
+
+      var n = Math.round(years * 12);          // total number of months
+      var r = annual / 100 / 12;               // monthly interest rate
+      var emi;
+
+      if (r === 0) {
+        emi = P / n;                           // 0% loan: simple division
+      } else {
+        // Standard EMI formula:  P * r * (1+r)^n / ((1+r)^n - 1)
+        var pow = Math.pow(1 + r, n);
+        emi = P * r * pow / (pow - 1);
+      }
+
+      var total = emi * n;
+      var interest = total - P;
+
+      $("emi").textContent = money(emi, sym);
+      $("interest").textContent = money(interest, sym);
+      $("total").textContent = money(total, sym);
+      $("count").textContent = n + " months";
+      $("result").style.display = "block";
+    }
+
+    $("calc").addEventListener("click", calculate);
+    // Let the Enter key trigger calculation from any input.
+    ["amount", "rate", "years", "currency"].forEach(function (id) {
+      $(id).addEventListener("keydown", function (e) {
+        if (e.key === "Enter") calculate();
+      });
+    });
+
+    calculate(); // show a result straight away with the default values
+  })();
+  </script>
+</body>
+</html>
