@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebQR — QR Code Maker</title>
+  <!-- "../../" means: go up two folders to reach the shared stylesheet. -->
+  <link rel="stylesheet" href="../../assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔳</text></svg>" />
+  <style>
+    /* Styles used only by this page live here. */
+    .qr { max-width: 460px; margin: 0 auto; }
+    .error { color: #b42318; font-size: .9rem; margin-top: 10px; min-height: 1.2em; }
+
+    /* The white box that holds the generated QR image. */
+    #qrbox {
+      display: inline-block;
+      padding: 14px;
+      background: #fff;
+      border: 1px solid var(--border, #e3e6ea);
+      border-radius: 12px;
+      line-height: 0;            /* removes gap under the canvas/img */
+    }
+    .qr-result { text-align: center; margin-top: 22px; }
+    .qr-result .scanned {
+      margin-top: 12px;
+      font-size: .85rem;
+      color: var(--muted, #69727d);
+      word-break: break-all;
+    }
+    /* Secondary (outlined) button used for "Download". */
+    .btn.secondary {
+      background: #fff;
+      color: var(--accent, #2563eb);
+      border: 1px solid var(--accent, #2563eb);
+      margin-top: 14px;
+    }
+    .btn.secondary:hover { background: var(--accent-bg, #eef3ff); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="../../index.html">← All calculators</a>
+
+    <div class="panel qr">
+      <h1>WebQR</h1>
+      <p class="subtitle">Paste a web address and get a QR code you can scan from any phone. Works forever — the link lives inside the code.</p>
+
+      <div class="field">
+        <label for="url">Web address</label>
+        <input id="url" type="text" inputmode="url" placeholder="e.g. example.com/some/long/page" />
+      </div>
+
+      <button class="btn" id="make">Create QR code</button>
+      <div class="error" id="error"></div>
+
+      <div class="qr-result" id="result" style="display:none;">
+        <div id="qrbox"></div>
+        <div class="scanned" id="scanned"></div>
+        <button class="btn secondary" id="download">Download as image</button>
+      </div>
+    </div>
+
+    <footer class="foot">Made entirely in your browser — nothing is uploaded anywhere.</footer>
+  </div>
+
+  <!-- Small, well-known QR library. Turns text into a QR image client-side. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var lastUrl = "";
+
+    // If the user forgets the scheme, assume https:// so the QR opens a site.
+    function normalise(raw) {
+      var s = raw.trim();
+      if (s === "") return "";
+      if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(s)) s = "https://" + s;
+      return s;
+    }
+
+    function make() {
+      var err = $("error");
+      err.textContent = "";
+
+      var url = normalise($("url").value);
+      if (url === "") {
+        err.textContent = "Please paste a web address first.";
+        $("result").style.display = "none";
+        return;
+      }
+
+      lastUrl = url;
+      var box = $("qrbox");
+      box.innerHTML = "";                 // clear any previous QR
+
+      // Draw the new QR code into the white box.
+      new QRCode(box, {
+        text: url,
+        width: 240,
+        height: 240,
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      $("scanned").textContent = "Points to: " + url;
+      $("result").style.display = "block";
+    }
+
+    // Find whatever the library rendered (a <canvas> on modern browsers,
+    // or an <img> as a fallback) and turn it into a downloadable PNG.
+    function download() {
+      var box = $("qrbox");
+      var canvas = box.querySelector("canvas");
+      var dataUrl;
+
+      if (canvas) {
+        dataUrl = canvas.toDataURL("image/png");
+      } else {
+        var img = box.querySelector("img");
+        if (!img) return;
+        dataUrl = img.src;
+      }
+
+      var a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = "webqr.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    $("make").addEventListener("click", make);
+    $("download").addEventListener("click", download);
+    $("url").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") make();
+    });
+  })();
+  </script>
+</body>
+</html>

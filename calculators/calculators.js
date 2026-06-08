@@ -43,5 +43,11 @@ window.CALCULATORS = [
     title: "Cylinder Volume Calculator",
     desc:  "Find the volume of a cylinder from its diameter and height.",
     url:   "calculators/cylinder-volume/index.html"
+  },
+  {
+    icon:  "🔳",
+    title: "WebQR",
+    desc:  "Turn a web address into a scannable QR code you can download.",
+    url:   "calculators/webqr/index.html"
   }
 ];
