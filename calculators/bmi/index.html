@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BMI Calculator</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>" />
+  <style>
+    .bmi { max-width: 460px; margin: 0 auto; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 420px) { .two { grid-template-columns: 1fr; } }
+    .error { color: #b42318; font-size: .9rem; margin-top: 10px; min-height: 1.2em; }
+    .units { display: flex; gap: 8px; margin-bottom: 16px; }
+    .units button {
+      flex: 1; padding: 10px; border: 1px solid #cbd5e1; background: #f8fafc;
+      border-radius: 8px; cursor: pointer; font: inherit; color: #475569;
+    }
+    .units button.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .cat { font-weight: 600; }
+    .cat.under { color: #2563eb; }
+    .cat.normal { color: #16a34a; }
+    .cat.over { color: #d97706; }
+    .cat.obese { color: #b42318; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="../../index.html">← All calculators</a>
+
+    <div class="panel bmi">
+      <h1>BMI Calculator</h1>
+      <p class="subtitle">BMI = a quick measure of whether your weight is healthy for your height.</p>
+
+      <div class="units">
+        <button id="uMetric" class="active">Metric (cm / kg)</button>
+        <button id="uImperial">Imperial (ft / lb)</button>
+      </div>
+
+      <!-- Metric inputs -->
+      <div id="metricFields">
+        <div class="two">
+          <div class="field">
+            <label for="cm">Height <span class="hint">(cm)</span></label>
+            <input id="cm" type="number" inputmode="decimal" placeholder="e.g. 170" value="170" min="0" />
+          </div>
+          <div class="field">
+            <label for="kg">Weight <span class="hint">(kg)</span></label>
+            <input id="kg" type="number" inputmode="decimal" placeholder="e.g. 65" value="65" min="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Imperial inputs -->
+      <div id="imperialFields" style="display:none;">
+        <div class="two">
+          <div class="field">
+            <label for="ft">Height <span class="hint">(feet)</span></label>
+            <input id="ft" type="number" inputmode="decimal" placeholder="e.g. 5" value="5" min="0" />
+          </div>
+          <div class="field">
+            <label for="in">&nbsp; <span class="hint">(inches)</span></label>
+            <input id="in" type="number" inputmode="decimal" placeholder="e.g. 7" value="7" min="0" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="lb">Weight <span class="hint">(pounds)</span></label>
+          <input id="lb" type="number" inputmode="decimal" placeholder="e.g. 143" value="143" min="0" />
+        </div>
+      </div>
+
+      <button class="btn" id="calc">Calculate</button>
+      <div class="error" id="error"></div>
+
+      <div class="result" id="result" style="display:none;">
+        <div>Your BMI</div>
+        <div class="big" id="bmi">—</div>
+        <div class="rows">
+          <div class="row"><span>Category</span><span id="category" class="cat">—</span></div>
+          <div class="row"><span>Healthy weight for your height</span><span id="healthy">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot">Nothing is sent anywhere — the maths happens in your browser.</footer>
+  </div>
+
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var metric = true;
+
+    function setUnit(useMetric) {
+      metric = useMetric;
+      $("uMetric").classList.toggle("active", metric);
+      $("uImperial").classList.toggle("active", !metric);
+      $("metricFields").style.display = metric ? "block" : "none";
+      $("imperialFields").style.display = metric ? "none" : "block";
+      calculate();
+    }
+
+    function category(bmi) {
+      if (bmi < 18.5)  return ["Underweight", "under"];
+      if (bmi < 25)    return ["Normal weight", "normal"];
+      if (bmi < 30)    return ["Overweight", "over"];
+      return ["Obese", "obese"];
+    }
+
+    function round1(n) { return Math.round(n * 10) / 10; }
+
+    function calculate() {
+      var err = $("error");
+      err.textContent = "";
+
+      var meters, kg;
+
+      if (metric) {
+        var cm = parseFloat($("cm").value);
+        kg = parseFloat($("kg").value);
+        if (!(cm > 0) || !(kg > 0)) {
+          err.textContent = "Please enter a positive height in cm and weight in kg.";
+          $("result").style.display = "none";
+          return;
+        }
+        meters = cm / 100;
+      } else {
+        var ft = parseFloat($("ft").value) || 0;
+        var inch = parseFloat($("in").value) || 0;
+        var lb = parseFloat($("lb").value);
+        var totalInches = ft * 12 + inch;
+        if (!(totalInches > 0) || !(lb > 0)) {
+          err.textContent = "Please enter a positive height and weight in pounds.";
+          $("result").style.display = "none";
+          return;
+        }
+        meters = totalInches * 0.0254;   // inches → metres
+        kg = lb * 0.45359237;            // pounds → kg
+      }
+
+      var bmi = kg / (meters * meters);
+      var cat = category(bmi);
+
+      // Healthy weight range = BMI 18.5–24.9 for this height
+      var lowKg = 18.5 * meters * meters;
+      var highKg = 24.9 * meters * meters;
+      var healthyText;
+      if (metric) {
+        healthyText = round1(lowKg) + "–" + round1(highKg) + " kg";
+      } else {
+        var lowLb = lowKg / 0.45359237;
+        var highLb = highKg / 0.45359237;
+        healthyText = round1(lowLb) + "–" + round1(highLb) + " lb";
+      }
+
+      $("bmi").textContent = round1(bmi);
+      var catEl = $("category");
+      catEl.textContent = cat[0];
+      catEl.className = "cat " + cat[1];
+      $("healthy").textContent = healthyText;
+      $("result").style.display = "block";
+    }
+
+    $("uMetric").addEventListener("click", function () { setUnit(true); });
+    $("uImperial").addEventListener("click", function () { setUnit(false); });
+    $("calc").addEventListener("click", calculate);
+
+    ["cm", "kg", "ft", "in", "lb"].forEach(function (id) {
+      $(id).addEventListener("keydown", function (e) {
+        if (e.key === "Enter") calculate();
+      });
+    });
+
+    calculate(); // show a result straight away with the default values
+  })();
+  </script>
+</body>
+</html>

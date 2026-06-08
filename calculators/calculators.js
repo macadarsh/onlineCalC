@@ -31,11 +31,11 @@ window.CALCULATORS = [
     title: "Loan / EMI Calculator",
     desc:  "Find your monthly payment and total interest on a loan.",
     url:   "calculators/loan-emi/index.html"
+  },
+  {
+    icon:  "⚖️",
+    title: "BMI Calculator",
+    desc:  "Check if your weight is healthy for your height (metric or imperial).",
+    url:   "calculators/bmi/index.html"
   }
-  // ,{
-  //   icon:  "⚖️",
-  //   title: "BMI Calculator",
-  //   desc:  "Work out your Body Mass Index.",
-  //   url:   "calculators/bmi/index.html"
-  // }   ← example of how a future entry would look (remove the // to enable)
 ];
