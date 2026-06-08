@@ -37,5 +37,11 @@ window.CALCULATORS = [
     title: "BMI Calculator",
     desc:  "Check if your weight is healthy for your height (metric or imperial).",
     url:   "calculators/bmi/index.html"
+  },
+  {
+    icon:  "🛢️",
+    title: "Cylinder Volume Calculator",
+    desc:  "Find the volume of a cylinder from its diameter and height.",
+    url:   "calculators/cylinder-volume/index.html"
   }
 ];

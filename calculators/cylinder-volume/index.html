@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cylinder Volume Calculator</title>
+  <!-- "../../" means: go up two folders to reach the shared stylesheet. -->
+  <link rel="stylesheet" href="../../assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛢️</text></svg>" />
+  <style>
+    /* Styles used only by this calculator live here. */
+    .cyl { max-width: 460px; margin: 0 auto; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 420px) { .two { grid-template-columns: 1fr; } }
+    .error { color: #b42318; font-size: .9rem; margin-top: 10px; min-height: 1.2em; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="../../index.html">← All calculators</a>
+
+    <div class="panel cyl">
+      <h1>Cylinder Volume Calculator</h1>
+      <p class="subtitle">Volume = π × radius² × height, where radius = diameter ÷ 2.</p>
+
+      <div class="two">
+        <div class="field">
+          <label for="dia">Diameter</label>
+          <input id="dia" type="number" inputmode="decimal" placeholder="e.g. 10" value="10" min="0" />
+        </div>
+        <div class="field">
+          <label for="ht">Height</label>
+          <input id="ht" type="number" inputmode="decimal" placeholder="e.g. 20" value="20" min="0" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="unit">Units</label>
+        <select id="unit">
+          <option value="cm">Centimetres (cm)</option>
+          <option value="m">Metres (m)</option>
+          <option value="mm">Millimetres (mm)</option>
+          <option value="in">Inches (in)</option>
+          <option value="ft">Feet (ft)</option>
+        </select>
+      </div>
+
+      <button class="btn" id="calc">Calculate</button>
+      <div class="error" id="error"></div>
+
+      <div class="result" id="result" style="display:none;">
+        <div>Volume</div>
+        <div class="big" id="volume">—</div>
+        <div class="rows">
+          <div class="row"><span>Radius</span><span id="radius">—</span></div>
+          <div class="row"><span>In litres</span><span id="litres">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot">Nothing is sent anywhere — the maths happens in your browser.</footer>
+  </div>
+
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+
+    // How many litres are in one cubic <unit>. (1 litre = 1000 cm³.)
+    var litresPerCubic = {
+      cm: 0.001,            // 1 cm³  = 0.001 L
+      m:  1000,             // 1 m³   = 1000 L
+      mm: 0.000001,         // 1 mm³  = 0.000001 L
+      in: 0.016387064,      // 1 in³  = 0.016387064 L
+      ft: 28.316846592      // 1 ft³  = 28.316846592 L
+    };
+
+    // Round to a sensible number of significant figures, then tidy up.
+    function fmt(n) {
+      if (!isFinite(n)) return "Error";
+      var rounded = Number(n.toPrecision(6));
+      return rounded.toLocaleString(undefined, { maximumFractionDigits: 6 });
+    }
+
+    function calculate() {
+      var err = $("error");
+      err.textContent = "";
+
+      var dia = parseFloat($("dia").value);
+      var ht  = parseFloat($("ht").value);
+      var unit = $("unit").value;
+
+      if (!(dia > 0) || !(ht > 0)) {
+        err.textContent = "Please enter a positive diameter and height.";
+        $("result").style.display = "none";
+        return;
+      }
+
+      var radius = dia / 2;
+      var volume = Math.PI * radius * radius * ht;   // V = π r² h
+      var litres = volume * litresPerCubic[unit];
+
+      $("volume").textContent = fmt(volume) + " " + unit + "³";
+      $("radius").textContent = fmt(radius) + " " + unit;
+      $("litres").textContent = fmt(litres) + " L";
+      $("result").style.display = "block";
+    }
+
+    $("calc").addEventListener("click", calculate);
+    $("unit").addEventListener("change", calculate);
+
+    ["dia", "ht"].forEach(function (id) {
+      $(id).addEventListener("keydown", function (e) {
+        if (e.key === "Enter") calculate();
+      });
+    });
+
+    calculate(); // show a result straight away with the default values
+  })();
+  </script>
+</body>
+</html>
